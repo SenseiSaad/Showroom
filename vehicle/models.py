@@ -22,6 +22,7 @@ class Vehicle(models.Model):
     category = models.ForeignKey(Category,on_delete=models.CASCADE,related_name="vehicles")
 
     name = models.CharField(max_length=100)
+    price=models.DecimalField(max_digits=10, decimal_places=2)
     fuel_type = models.CharField(max_length=20)
     transmission = models.CharField(max_length=20)
     top_speed = models.PositiveIntegerField()

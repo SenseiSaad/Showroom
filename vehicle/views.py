@@ -1,13 +1,13 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.shortcuts import get_object_or_404
 from .models import Vehicle
 from .serializers import VehicleSerializer
 
 @api_view(['GET'])
 def view(request, id):
-    vehicle=Vehicle.objects.get(id=id)
+    vehicle=get_object_or_404(Vehicle, id=id)
     serializer=VehicleSerializer(vehicle)
     return Response(serializer.data)
 
@@ -28,7 +28,7 @@ def create(request):
 
 @api_view(['PUT'])
 def update(request, id):
-    vehicle=Vehicle.objects.get(id=id)
+    vehicle=get_object_or_404(Vehicle, id=id)
     serializer=VehicleSerializer(vehicle ,data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -37,6 +37,6 @@ def update(request, id):
 
 @api_view(['DELETE'])
 def delete(request,id):
-    vehicle=Vehicle.objects.get(id=id)
+    vehicle=get_object_or_404(Vehicle, id=id)
     vehicle.delete()
-    return Response({'message':'deleted'})
+    return Response({'message':'deleted'}, status=status.HTTP_204_NO_CONTENT)
