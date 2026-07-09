@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hyperthon | Django Backend</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 30%),
+          radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 28%),
+          linear-gradient(180deg, #020617 0%, #0f172a 45%, #111827 100%);
+        color: #e5e7eb;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        max-width: 960px;
+        width: 100%;
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 28px;
+        padding: 40px;
+        box-shadow: 0 30px 90px rgba(0,0,0,0.35);
+        backdrop-filter: blur(18px);
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #fbbf24;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      h1 {
+        font-size: clamp(2.5rem, 5vw, 5.5rem);
+        line-height: 0.95;
+        margin: 14px 0 16px;
+      }
+      p { color: #cbd5e1; line-height: 1.75; max-width: 70ch; }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+      a {
+        display: inline-block;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-weight: 700;
+      }
+      .primary { background: linear-gradient(135deg, #f59e0b, #f97316); color: #111827; }
+      .secondary { background: rgba(255,255,255,0.06); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.08); }
+      .grid {
+        margin-top: 32px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .tile {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 20px;
+      }
+      .tile h2 { margin: 0 0 8px; font-size: 1rem; }
+      @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .card { padding: 26px; } }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="eyebrow">Django backend online</div>
+      <h1>Hyperthon backend and frontend are separated cleanly.</h1>
+      <p>This Django app powers vehicle inventory, authentication, and user registration APIs. The React frontend now lives in the separate frontend folder and communicates with this backend through JWT and vehicle endpoints.</p>
+      <div class="actions">
+        <a class="primary" href="/admin/">Open Django Admin</a>
+        <a class="secondary" href="/vehicle/">View Vehicle API</a>
+        <a class="secondary" href="/api/token/">JWT Login Endpoint</a>
+      </div>
+      <section class="grid">
+        <div class="tile">
+          <h2>Marketplace API</h2>
+          <p>GET /vehicle/ for the inventory list, and filter by brand, horsepower, speed, price, or year.</p>
+        </div>
+        <div class="tile">
+          <h2>Authentication</h2>
+          <p>POST /api/token/ to sign in from the frontend and attach the returned access token to protected calls.</p>
+        </div>
+        <div class="tile">
+          <h2>Management</h2>
+          <p>Use the frontend login and marketplace form to create vehicles after signing in.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+  </html>
