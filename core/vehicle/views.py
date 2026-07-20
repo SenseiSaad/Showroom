@@ -8,6 +8,7 @@ from .models import Brand, Category, Vehicle
 from .serializers import (
     BrandSerializer,
     CategorySerializer,
+    ContactMessageSerializer,
     VehicleSerializer,
     UserRegistrationSerializer,
 )
@@ -33,6 +34,8 @@ def all(request):
     origin=request.query_params.get("country_of_origin")
     prices=request.query_params.get("price")
     names=request.query_params.get("name")
+    electric=request.query_params.get("electric")
+    petrol=request.query_params.get("petrol")
 
     if brand:
         queryset=queryset.filter(brand__name__iexact=brand)
@@ -48,7 +51,10 @@ def all(request):
         queryset=queryset.filter(price__lte=prices)
     if names:
         queryset=queryset.filter(name__icontains=names)
-    
+    if electric:
+        queryset=queryset.filter(is_electric=True)
+    if petrol:
+        queryset=queryset.filter(is_petrol=True)
 
     pagination=CustomPagination()
     paginated_vehicle=pagination.paginate_queryset(queryset, request)
@@ -63,7 +69,7 @@ def create(request):
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer. errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])
@@ -99,4 +105,13 @@ def register_user(request):
             },
             status=status.HTTP_201_CREATED,
         )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+def submit_message(request):
+    serializer = ContactMessageSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

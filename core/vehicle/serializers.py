@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Brand, Category, Vehicle 
+from .models import Brand, Category, ContactMessage, Vehicle 
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -65,3 +65,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             email=validated_data.get("email", ""),
             password=validated_data["password"],
         )
+
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ["id", "name", "email", "subject", "message", "created_at"]
+
+    def validate_message(self, value):
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError("Message must be at least 10 characters long.")
+        return value

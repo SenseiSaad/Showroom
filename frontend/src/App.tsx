@@ -1,91 +1,106 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Brand, Category, Vehicle, createVehicle, getBrands, getCategories, getVehicles, login, registerUser } from './api';
+import { useMemo, useState } from 'react';
+import { submitContactMessage } from './api';
 
-type Page = 'home' | 'marketplace' | 'privacy' | 'about' | 'login';
+type Page = 'home' | 'projects' | 'logs' | 'experience' | 'contact';
 
-const emptyVehicle = {
-  brand: '',
-  category: '',
+const projects = [
+  {
+    title: 'Operator Console',
+    category: 'Platform Design',
+    summary: 'A control room for deployment health, incidents, and client-ready status reporting.',
+    stack: ['React', 'Django', 'PostgreSQL'],
+    impact: 'Reduced status-update prep time from hours to minutes.',
+  },
+  {
+    title: 'Portfolio System',
+    category: 'Personal Brand',
+    summary: 'A fast portfolio with project pages, experience tracking, and admin-backed contact messages.',
+    stack: ['Vite', 'TypeScript', 'Django Admin'],
+    impact: 'Created a single source of truth for leads and collaboration requests.',
+  },
+  {
+    title: 'Delivery Tracker',
+    category: 'Internal Tools',
+    summary: 'A logging surface for ship dates, blockers, and release notes across active workstreams.',
+    stack: ['REST API', 'Responsive UI', 'Forms'],
+    impact: 'Gave stakeholders a clean timeline without asking for follow-up messages.',
+  },
+];
+
+const logs = [
+  {
+    date: '2026-07-20',
+    title: 'Portfolio refresh launched',
+    note: 'Replaced the legacy vehicle marketplace with a portfolio layout centered on projects and experience.',
+  },
+  {
+    date: '2026-07-18',
+    title: 'Message persistence wired',
+    note: 'Contact form submissions now save into Django and appear in admin for review.',
+  },
+  {
+    date: '2026-07-16',
+    title: 'Projects page system shaped',
+    note: 'Designed content blocks for work samples, outcomes, and stack details.',
+  },
+];
+
+const experience = [
+  {
+    role: 'Backend and Cloud DevOps Engineer',
+    period: '2024 - Present',
+    details: 'Builds Django services, deployment workflows, and client-facing systems with a bias for simple operations.',
+  },
+  {
+    role: 'Full Stack Engineer',
+    period: '2022 - 2024',
+    details: 'Shipped internal tools, admin dashboards, and operational pages that kept teams aligned.',
+  },
+  {
+    role: 'Automation Builder',
+    period: '2020 - 2022',
+    details: 'Focused on workflow automation, API integration, and reliable delivery pipelines.',
+  },
+];
+
+const defaultContact = {
   name: '',
-  price: '',
-  fuel_type: '',
-  transmission: '',
-  top_speed: '',
-  horsepower: '',
-  country_of_origin: '',
-  year: '',
-  description: '',
+  email: '',
+  subject: '',
+  message: '',
 };
 
 export default function App() {
   const [page, setPage] = useState<Page>('home');
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [query, setQuery] = useState('');
-  const [sessionToken, setSessionToken] = useState('');
+  const [contactForm, setContactForm] = useState(defaultContact);
   const [status, setStatus] = useState('');
-  const [authForm, setAuthForm] = useState({ username: '', email: '', password: '' });
-  const [vehicleForm, setVehicleForm] = useState(emptyVehicle);
+  const heroStats = useMemo(
+    () => [
+      { value: '03', label: 'featured projects' },
+      { value: '10+', label: 'years of combined delivery thinking' },
+      { value: '01', label: 'admin-backed message queue' },
+    ],
+    [],
+  );
 
-  useEffect(() => {
-    Promise.all([getVehicles(), getBrands(), getCategories()])
-      .then(([vehicleResult, brandResult, categoryResult]) => {
-        setVehicles(Array.isArray(vehicleResult) ? vehicleResult : vehicleResult.results || []);
-        setBrands(brandResult);
-        setCategories(categoryResult);
-      })
-      .catch(() => setStatus('Could not reach Django backend. Start it first.'));
-  }, []);
-
-  const filteredVehicles = useMemo(() => {
-    return vehicles.filter((vehicle) => {
-      const label = `${vehicle.brand_name || vehicle.brand} ${vehicle.name}`.toLowerCase();
-      return label.includes(query.toLowerCase());
-    });
-  }, [vehicles, query]);
-
-  const onLogin = async (event: React.FormEvent) => {
+  const onSubmitMessage = async (event: React.FormEvent) => {
     event.preventDefault();
-    const data = await login(authForm.username, authForm.password);
-    setSessionToken(data.access);
-    setStatus('Logged in successfully.');
-    setPage('marketplace');
-  };
-
-  const onRegister = async () => {
-    await registerUser(authForm);
-    setStatus('User registered. Now log in.');
-    setPage('login');
-  };
-
-  const onCreateVehicle = async (event: React.FormEvent) => {
-    event.preventDefault();
-    await createVehicle(sessionToken, {
-      ...vehicleForm,
-      brand: Number(vehicleForm.brand),
-      category: Number(vehicleForm.category),
-      price: Number(vehicleForm.price),
-      top_speed: Number(vehicleForm.top_speed),
-      horsepower: Number(vehicleForm.horsepower),
-      year: Number(vehicleForm.year),
-    });
-    const fresh = await getVehicles();
-    setVehicles(Array.isArray(fresh) ? fresh : fresh.results || []);
-    setVehicleForm(emptyVehicle);
-    setStatus('Vehicle created successfully.');
+    await submitContactMessage(contactForm);
+    setContactForm(defaultContact);
+    setStatus('Message saved in Django admin.');
+    setPage('home');
   };
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="brand" onClick={() => setPage('home')} role="button" tabIndex={0}>Hyperthon</div>
+        <div className="brand" onClick={() => setPage('home')} role="button" tabIndex={0}>SaadOps</div>
         <nav>
           <button onClick={() => setPage('home')}>Home</button>
-          <button onClick={() => setPage('marketplace')}>Marketplace</button>
-          <button onClick={() => setPage('about')}>About Us</button>
-          <button onClick={() => setPage('privacy')}>Privacy Policy</button>
-          <button onClick={() => setPage('login')}>Login</button>
+          <button onClick={() => setPage('projects')}>Projects</button>
+          <button onClick={() => setPage('logs')}>Logs</button>
+          <button onClick={() => setPage('experience')}>Work Experience</button>
+          <button onClick={() => setPage('contact')}>Contact</button>
         </nav>
       </header>
 
@@ -93,66 +108,87 @@ export default function App() {
 
       {page === 'home' && (
         <section className="hero panel">
-          <div>
-            <p className="eyebrow">Connected to Django</p>
-            <h1>Premium Automotive Marketplace</h1>
-            <p>Explore vehicles by brand, horsepower, category, and price. Login to add new inventory directly from the frontend.</p>
+          <div className="hero-copy">
+            <p className="eyebrow">Portfolio frontend connected to Django</p>
+            <h1>Projects, logs, work experience, and contact messages in one clean workspace.</h1>
+            <p>This frontend replaces the old vehicle demo with a portfolio layout that feels like a real personal site. Messages submitted here are stored in Django and visible in admin.</p>
             <div className="hero-actions">
-              <button onClick={() => setPage('marketplace')} className="primary">Browse Marketplace</button>
-              <button onClick={() => setPage('login')} className="secondary">Login</button>
+              <button onClick={() => setPage('projects')} className="primary">View Projects</button>
+              <button onClick={() => setPage('contact')} className="secondary">Send a Message</button>
             </div>
           </div>
           <aside className="stats-card">
-            <span>{vehicles.length}</span>
-            <small>vehicles loaded from Django</small>
+            {heroStats.map((stat) => (
+              <div key={stat.label} className="stat-row">
+                <span>{stat.value}</span>
+                <small>{stat.label}</small>
+              </div>
+            ))}
           </aside>
         </section>
       )}
 
-      {page === 'marketplace' && (
+      {page === 'projects' && (
         <section className="panel stack">
-          {sessionToken ? (
-            <form onSubmit={onCreateVehicle} className="create-form">
-              <h2>Add Vehicle</h2>
-              <div className="grid">
-                <select value={vehicleForm.brand} onChange={(e) => setVehicleForm((prev) => ({ ...prev, brand: e.target.value }))}>
-                  <option value="">Brand</option>
-                  {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
-                </select>
-                <select value={vehicleForm.category} onChange={(e) => setVehicleForm((prev) => ({ ...prev, category: e.target.value }))}>
-                  <option value="">Category</option>
-                  {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-                </select>
-                <input placeholder="Name" value={vehicleForm.name} onChange={(e) => setVehicleForm((prev) => ({ ...prev, name: e.target.value }))} />
-                <input placeholder="Price" type="number" value={vehicleForm.price} onChange={(e) => setVehicleForm((prev) => ({ ...prev, price: e.target.value }))} />
-                <input placeholder="Horsepower" type="number" value={vehicleForm.horsepower} onChange={(e) => setVehicleForm((prev) => ({ ...prev, horsepower: e.target.value }))} />
-                <input placeholder="Top speed" type="number" value={vehicleForm.top_speed} onChange={(e) => setVehicleForm((prev) => ({ ...prev, top_speed: e.target.value }))} />
-                <input placeholder="Fuel type" value={vehicleForm.fuel_type} onChange={(e) => setVehicleForm((prev) => ({ ...prev, fuel_type: e.target.value }))} />
-                <input placeholder="Transmission" value={vehicleForm.transmission} onChange={(e) => setVehicleForm((prev) => ({ ...prev, transmission: e.target.value }))} />
-                <input placeholder="Country" value={vehicleForm.country_of_origin} onChange={(e) => setVehicleForm((prev) => ({ ...prev, country_of_origin: e.target.value }))} />
-                <input placeholder="Year" type="number" value={vehicleForm.year} onChange={(e) => setVehicleForm((prev) => ({ ...prev, year: e.target.value }))} />
-                <textarea placeholder="Description" value={vehicleForm.description} onChange={(e) => setVehicleForm((prev) => ({ ...prev, description: e.target.value }))} />
-              </div>
-              <button className="primary" type="submit">Create Vehicle</button>
-            </form>
-          ) : (
-            <p className="muted">Login first to create vehicles.</p>
-          )}
-
-          <div className="search-row">
-            <input placeholder="Search by brand or model" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <div className="section-heading">
+            <p className="eyebrow">Selected work</p>
+            <h2>Proper project highlights.</h2>
+            <p>Each card summarizes the problem, stack, and outcome instead of just listing features.</p>
           </div>
+          <div className="project-grid">
+            {projects.map((project) => (
+              <article key={project.title} className="project-card">
+                <div className="project-card-top">
+                  <span>{project.category}</span>
+                  <button className="ghost-link" onClick={() => setPage('logs')}>Open logs</button>
+                </div>
+                <h3>{project.title}</h3>
+                <p>{project.summary}</p>
+                <ul>
+                  {project.stack.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <strong>{project.impact}</strong>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
-          <div className="vehicle-grid">
-            {filteredVehicles.map((vehicle) => (
-              <article key={vehicle.id} className="vehicle-card">
-                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200" alt={vehicle.name} />
+      {page === 'logs' && (
+        <section className="panel stack">
+          <div className="section-heading">
+            <p className="eyebrow">Live log</p>
+            <h2>Open a new page for work notes.</h2>
+            <p>Use this as a fresh page for updates, release notes, or progress logging while keeping the UI simple.</p>
+          </div>
+          <div className="log-list">
+            {logs.map((entry) => (
+              <article key={entry.title} className="log-card">
+                <time>{entry.date}</time>
+                <h3>{entry.title}</h3>
+                <p>{entry.note}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {page === 'experience' && (
+        <section className="panel stack">
+          <div className="section-heading">
+            <p className="eyebrow">Work history</p>
+            <h2>Experience with delivery context.</h2>
+            <p>A tighter overview of roles, date ranges, and what each phase contributed.</p>
+          </div>
+          <div className="timeline">
+            {experience.map((item) => (
+              <article key={item.role} className="timeline-item">
+                <div className="timeline-year">{item.period}</div>
                 <div>
-                  <p>{vehicle.brand_name || vehicle.brand}</p>
-                  <h3>{vehicle.name}</h3>
-                  <span>{vehicle.horsepower} HP</span>
-                  <span>{vehicle.top_speed} km/h</span>
-                  <strong>${Number(vehicle.price).toLocaleString()}</strong>
+                  <h3>{item.role}</h3>
+                  <p>{item.details}</p>
                 </div>
               </article>
             ))}
@@ -160,30 +196,40 @@ export default function App() {
         </section>
       )}
 
-      {page === 'login' && (
-        <section className="panel auth-panel">
-          <form onSubmit={onLogin} className="auth-form">
-            <h2>Login</h2>
-            <input placeholder="Username" value={authForm.username} onChange={(e) => setAuthForm((prev) => ({ ...prev, username: e.target.value }))} />
-            <input placeholder="Email" value={authForm.email} onChange={(e) => setAuthForm((prev) => ({ ...prev, email: e.target.value }))} />
-            <input placeholder="Password" type="password" value={authForm.password} onChange={(e) => setAuthForm((prev) => ({ ...prev, password: e.target.value }))} />
-            <button className="primary" type="submit">Sign In</button>
-            <button className="secondary" type="button" onClick={onRegister}>Create Account</button>
+      {page === 'contact' && (
+        <section className="panel contact-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Contact</p>
+            <h2>Send a message that is saved in admin.</h2>
+            <p>The form posts directly to Django so messages can be reviewed from the admin panel.</p>
+          </div>
+          <form className="contact-form" onSubmit={onSubmitMessage}>
+            <div className="grid-2">
+              <input
+                placeholder="Your name"
+                value={contactForm.name}
+                onChange={(e) => setContactForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+              <input
+                placeholder="Your email"
+                type="email"
+                value={contactForm.email}
+                onChange={(e) => setContactForm((prev) => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <input
+              placeholder="Subject"
+              value={contactForm.subject}
+              onChange={(e) => setContactForm((prev) => ({ ...prev, subject: e.target.value }))}
+            />
+            <textarea
+              placeholder="Message"
+              rows={6}
+              value={contactForm.message}
+              onChange={(e) => setContactForm((prev) => ({ ...prev, message: e.target.value }))}
+            />
+            <button className="primary" type="submit">Save Message</button>
           </form>
-        </section>
-      )}
-
-      {page === 'about' && (
-        <section className="panel copy-page">
-          <h2>About Us</h2>
-          <p>This separate frontend is connected to the Django backend through the `/api/token/`, `/vehicle/`, `/vehicle/brands/`, and `/vehicle/categories/` endpoints.</p>
-        </section>
-      )}
-
-      {page === 'privacy' && (
-        <section className="panel copy-page">
-          <h2>Privacy Policy</h2>
-          <p>We only send login and inventory data required to authenticate users and manage vehicles.</p>
         </section>
       )}
     </div>
